@@ -1,0 +1,200 @@
+<html>
+
+	<head>
+
+		<title>CIS 4900 - I Hou Tong</title>
+	
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/bootstrap-theme.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">
+	</head>
+
+	<body>
+	
+		<!-- Setting up the navigation for the website -->
+		<nav class="navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<!-- Displaying the program name on left of navigation -->
+					<div class="navbar-brand">Environmental Simulator</div>
+				</div>
+				
+				<!-- Set up the navigation -->
+				<div class="collapse navbar-collapse">
+					<!-- hidden, not needed for this page
+						<ul class="nav navbar-nav">
+						<li> <a href="#"> Home </a> </li>
+						<li> <a href="#"> Map </a> </li>
+						<li> <a href="#"> Technology </a> </li>
+						<li> <a href="#"> Jobs </a> </li>
+					</ul>-->
+					
+					<ul class="nav navbar-nav navbar-right">
+						<li> <a href="#"> Help </a> </li>
+						<li> <a href="#"> Sources </a> </li>
+						<li> <a href="start.html" onclick="restartGame()">Restart</a></li>
+					</ul>
+				</div>
+			</div> <!-- end of container -->
+		</nav> <!-- end of navigation -->
+		
+		
+		<div class="float-left-startscreen">
+			<canvas id="mousePosition" width="150" height="50" style="border:1px solid #000000;"> </canvas> <br />
+			<canvas id="initialStart" width="800" height="400"> </canvas>
+		</div>
+		
+		
+		
+		<div class="float-right-startscreen">
+			<form class="form-horizontal">
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Name</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" id="username" placeholder="Name">
+					</div>
+				</div>
+				<!-- need to add value -->
+				<select class="form-control" id="timelimit">
+					<option value="" disabled selected>Time to play</option>
+					<option value="10"> 10 year </option>
+					<option value="100"> 100 year </option>
+					<option value="1000"> 1000 year</option>
+					<option value="10000"> 10000 year</option>
+					<option value="0"> Unlimited</option>
+				</select>
+			</form>
+			<!-- separate submit button from form -->
+			<div align="right">
+				<button class="btn btn-default" onclick="grabInformation()">Submit</button>
+			</div>
+		</div>
+			
+			<br />
+		</div>
+	
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/common.js"></script>
+	<script src="resourcedata.js"></script>
+	<script src="upgradedata.js"></script>
+	<script src="class/map.js"></script>
+	<script src="class/resource.js"></script>
+	<script src="class/player.js"></script>
+	<script src="playerStatsData.js"></script>
+	<script src="playerInitialResource.js"></script>
+	
+	<script>
+		
+		//checks if the player already have an existing game going on.
+		if (localStorage.player){
+			//if the player does have an existing file, asks the player if they would like to start over
+			var confirmation = confirm("Player already exists, do you want to start over? (If not, you will be moved to home)");
+			//clears localStorage if they want to restart
+			if (confirmation)
+				localStorage.clear();
+			//otherwise, it moves them to the homepage
+			else
+				document.location.href="home.html";
+		}
+		
+		//grab the context of the canvas in order to draw to it
+		var initialStart = $("#initialStart")[0];
+		var initialStartContext = initialStart.getContext("2d");
+		//Creates the lines between each area
+		initialStartContext.strokeStyle = "black";
+		//holds the image to be drawn on the map
+		var image = [];
+		var imagesource;
+		
+		//holds the x and y position (after dividing x by width and y by height) of the selected part of the map
+		var mapselection;
+		
+		//create a Player object
+		var player = new Player();
+		
+		//calls the function drawMap in common.js
+		drawMap();
+		
+		//grabs all the information and adds it to the Player object and saves it to localStorage
+		function grabInformation(){
+			//save the player start point
+			player.baseXPos = mapselection.x - 1;
+			player.baseYPos = mapselection.y -1;
+			//changes the player start point to be explored
+			player.entireMap[player.baseXPos][player.baseYPos].explored = true;
+			//grab the player name and timelimit that the player would like to play for
+			player.name = $("#username").val();
+			player.timeLimit = $("#timelimit").val();
+			
+			//call playerStats function which copies the playerInitialResource and playerStatsData array and saves it to the Player object
+			playerStats();
+			
+			//declare the jobs as an array. This is done so we can add jobs to the array later. Without this, we would only be able to add one job
+			//and if we add another job, it would overwrite the existing job
+			player.jobs = [];
+			
+			//set the amount of time the player has played as 0. Represents months that has passed.
+			player.timeElapsed = 0;
+			
+			//Set the amount of time when the population has last increased (Every 45 minutes in real time/9 months in game time)
+			player.populationGrowthTimer = 0;
+	
+			//save the current date use in calculateEverythingFromLastUpdate() in common.js
+			player.lastUpdate = new Date();
+			
+			//saves the time from the last update in milliseconds
+			//this is done to ensure the player gets their resources properly if a minute has no yet elapsed when the page was loaded
+			player.timeFromLastUpdateToNow = 0;
+			//save everything as a json in localStorage
+			localStorage.player = JSON.stringify(player);
+			var firstTime = confirm("Would you like to move to the guide? (Recommended if this is the first time you are playing)");
+			if (firstTime)
+				document.location.href = "help.html";
+			else
+				//move the user to the home page
+				document.location.href = "home.html";
+		}
+		
+		
+		//Copies playerInitialResource and playerStatsData array to the Player object
+		//both arrays are located on separate files
+		function playerStats(){
+			player.playerResource = playerInitialResource;
+			player.playerStats = playerStatsData;
+		}
+		//adds a click listener to the canvas
+		//this is used to detect where the player clicks on the map
+		initialStart.addEventListener ('click', function() {
+			mapselection = getMousePos();
+			
+			//message printed in the second canvas box.
+			//this is used primarily for testing purposes to ensure I am clicking the right box when testing and the mouse position is working properly
+			var message = 'Mouse Position: ' + mapselection.x + " , " + mapselection.y;
+			
+			//sets up the second canvas
+			//The second canvas tells the player the currently selected area
+			var mousePositionContext = $("#mousePosition")[0].getContext("2d");
+			mousePositionContext.clearRect(0, 0, $("#mousePosition")[0].width, $("#mousePosition")[0].height);
+			//displays the message that was set up with the mouse positions
+			mousePositionContext.fillText(message, 15, 20);
+			
+			//displays an error message if the user tries to select water as starting location
+			if (player.entireMap[mapselection.x - 1][mapselection.y - 1].type === 1){
+				alert("Can't select water as starting location. Please select a land");
+			}
+			
+			/* no longer needed
+			var confirmation = confirm("You have selected postion " + (Math.floor(mousePos.x/80) + 1 ) + ' , ' + (Math.floor(mousePos.y/40) + 1) + "\n Would you like to start here?");
+			
+			if (confirmation == true) {
+				//perform some error checking to see if user entered a name and time
+				//if not, display an alert
+				location.href = "home.html";
+			}
+			else {
+			}*/
+		});
+	</script>
+	</body>
+</html>

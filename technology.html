@@ -1,0 +1,133 @@
+<html>
+
+	<head>
+
+		<title>CIS 4900 - I Hou Tong</title>
+	
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/bootstrap-theme.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">
+	</head>
+
+	<body>
+	
+		<!-- Setting up the navigation for the website -->
+		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<!-- Displaying the program name on left of navigation -->
+					<div class="navbar-brand">Environmental Simulator</div>
+				</div>
+				
+				<!-- Set up the navigation -->
+				<div class="collapse navbar-collapse">
+						<ul class="nav navbar-nav">
+						<li> <a href="home.html"> Home </a> </li>
+						<li> <a href="map.html"> Map </a> </li>
+						<li class="active"> <a href="technology.html"> Technology </a> </li>
+						<li> <a href="jobs.html"> Jobs </a> </li>
+					</ul>
+					
+					<ul class="nav navbar-nav navbar-right">
+						<li> <a id="timeElapsed"></a></li>
+						<li> <a id="population"></a></li>
+						<li> <a id="happiness"></a></li>
+						<li> <a id="pollution"></a></li>
+						<li> <a href="stats.html" id="playerName"></a> </li>
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+								More <span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu" role="menu">
+								<li> <a href="help.html"> Help </a> </li>
+								<li> <a href="sources.html"> Sources </a> </li>
+								<li> <a href="facts.html">Facts</a></li>
+								<li> <a onclick="restartGame()">Restart</a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div> <!-- end of container -->
+		</nav> <!-- end of navigation -->
+		
+		<div class="container">
+			<div class="col-md-12">
+				<div id="alert"></div>
+			</div>
+		</div>
+		<div align="center">
+		<!--<div class="float-left-nomap">-->
+			<table id="upgradeOption"></table>
+		</div>
+		
+	<script src="js/common.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script>
+		//return player from localStorage and store it in player variable
+		var player = returnPlayer();
+		
+		//function calls to set up the pages
+		calculateEverythingFromLastUpdate();
+		displayUpgrades();
+		displayNavBarStat();
+		saveBeforeUnload();
+		
+		
+		
+		
+		function displayUpgrades(){
+			//empty out the table with the id upgradeOption
+			$("#upgradeOption").empty();
+			//loop through all the upgrades in allUpgrades array
+			for (var i in player.allUpgrades)
+				//appends the upgrade name, description, name of the resource needed, and the cost of the upgrade to the table as a row
+				$("#upgradeOption").append("<tr><td>" + player.allUpgrades[i].name + "</td><td>" + player.allUpgrades[i].description + "</td><td>" + player.playerResource[player.allUpgrades[i].typeOfResource].name + " :</td><td> " + player.allUpgrades[i].cost + "</td><td>" + 
+									   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+									   "<button type='button' class='btn btn-default' onclick='upgradeConfirmation("+i+")'>Upgrade</button></td></tr>");
+		}
+		
+		//Takes in the index of the upgrade itself
+		//displays a confirmation asking if the player would like to upgrade or not. Clicking yes will upgrade it.
+		function upgradeConfirmation(i){
+			//display a confirmation with the upgrade name to make sure the player wants to upgrade
+			var confirmation = confirm("Are you sure you want to upgrade " + player.allUpgrades[i].name);
+			
+			if (confirmation){
+				//checks if the player has enough of the required resource
+				if (player.playerResource[player.allUpgrades[i].typeOfResource].currentAmount >= player.allUpgrades[i].cost){
+					//grab the upgrade from the upgrade array. Used to shorten the code.
+					upgrade = player.allUpgrades[i];
+					//upgrade level. takes current level and adds the level obtained from the upgrade
+					player.playerStats[upgrade.upgradeBenefitType].level += upgrade.upgradeBenefitAmount;
+					//increase/decrease pollution and happiness (the values stored can become negative)
+					player.playerStats[0].level += upgrade.pollution;
+					player.playerStats[1].level += upgrade.happiness;
+					
+					//take the cost of the upgrade from the player resources
+					player.playerResource[upgrade.typeOfResource].currentAmount -= upgrade.cost;
+					
+					//SPECIAL CASE specific for capacity upgrades. Special because the capacity can be upgraded infinitely, with increasing costs
+					//calculates new capacity for resources after upgrading the capacity
+					if (i > 12 && i <= 20){
+						player.playerResource[upgrade.upgradeBenefitType - 6].totalCapacity = player.playerStats[upgrade.upgradeBenefitType].level * 1000;
+						upgrade.cost *= 2;
+						player.allUpgrades.splice(i+1, 0, upgrade);
+					}//special case end
+					
+					//remove the upgrade from the list
+					player.allUpgrades.splice(i,1);
+					
+					//display the list again
+					displayUpgrades();
+					displayNavBarStat();
+				}
+				//if the player does not have enough resources, display the error message
+				else
+					alert("Insufficient resources");
+			}
+		}
+		
+	</script>
+	</body>
+</html>

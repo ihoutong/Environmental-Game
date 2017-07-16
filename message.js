@@ -1,0 +1,15 @@
+var messages = [
+	"Today is a great day",
+	"I wish we had more food",
+	"The streets are filthy!",
+	"I wish harvesting was easier",
+	"I wish we could discover new land",
+	"I wish we had more wood",
+	"I wish we had more jewelry",
+	"The clouds are moving slowly today.", 
+    "The sun feels great!",
+    "The harvest looks good this year!",
+    "Tea time for me...",
+    "Ah! Oh, that was just a butterfly.",
+	"I used to explore but then I took an arrow to the knee.",
+];

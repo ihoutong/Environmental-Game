@@ -1,0 +1,196 @@
+/*Offsets the entire page by setting it 70 pixels lower. This is because of the navigation bar. */
+body {
+	padding-top: 70px;
+}
+
+/*Makes a table easier to read by spacing each field in the table */
+table{
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
+/*Originally used to format the alerts. Not longer used and bootstrap container is used instead
+.alert-formatting{
+	position: absolute;
+	left:300px;
+	right:300px;
+}*/
+
+/* css for start screen */
+.float-left-startscreen{
+	position: absolute;
+	left: 200px;
+}
+
+.float-right-startscreen{
+	position: absolute;
+	right: 100px;
+}/* end for start css*/
+
+/* css for map page */
+.float-left-mapscreen{
+	position: absolute;
+	left:100px;
+}
+
+.float-right-mapscreen{
+	position: absolute;
+	right:300px;
+}/*end css for map page */
+
+/* css for pages that don't have a map */
+.float-left-nomap{
+	position: absolute;
+	left: 300px;
+}
+
+.float-right-nomap{
+	position: absolute;
+	right: 350px;
+} /*css ennd for pages that do have a map */
+
+/* css for job display on home screen. I decided to remove this from home screen so it is no longer used. */
+.jobs-almost-complete{
+	padding-top: 320px;
+}
+
+.job{
+	padding-top:20px;
+} /* css for job display on home screen end */
+
+/* css for text area on home screen */
+.textarea-hide-scroll{
+	overflow:hidden;
+	resize:none;
+}
+
+/*css for job page table*/
+.float-left-jobs-table{
+	position:absolute;
+	left: 200px;
+}
+
+/*css for job page resources*/
+.float-right-jobs-table{
+	position:absolute;
+	right: 200px;
+}
+
+/*css for the help, sources and facts page*/
+.wikistyle{
+	position:absolute;
+	left:200px;
+	right:200px;
+}
+
+/*css for the box in help, sources and facts page. Done in a way similar to the box in wiki pages*/
+.namelink-box{
+	position:relative;
+	border-style: solid;
+	border-width: 1px;
+	margin-right: 80%;
+}
+
+/*css for each section of the help, sources and facts page page*/
+.section{
+	position:relative;
+	word-wrap:break-word;
+}
+
+/*css for href tags. Sets text that are wrapped in a href tag to black*/
+.linkcolor{
+	color:black;
+}
+.linkcolor:hover{
+	color:black;
+	text-decoration:none;
+}
+
+/*Customizes the hr tag to fit the page. Done to simulate the style found in wiki pages*/
+hr{
+	position:relative;
+	border-color:black;
+}
+
+/* style for bootstrap navbar, generated at http://twbscolor.smarchal.com/scss?bd=ff8040&bh=804000&cd=000000&ch=ecdbff
+	This is not used. It was originally created per Professor Goetz suggestion to change the color of the navigation bar so the user
+	can easily see what is clickable or not. A different solution was found (changing all non-clickable to green)
+	
+.navbar-default {
+	background-image:none;
+	background-color: #ff8040;
+	border-color: #804000;
+}
+.navbar-default .navbar-brand {
+	color: #000000;
+}
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
+	color: #ecdbff;
+}
+.navbar-default .navbar-text {
+	color: #000000;
+}
+.navbar-default .navbar-nav > li > a {
+	color: #000000;
+}
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+	color: #ecdbff;
+}
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+	background-image:none;
+	color: #ecdbff;
+	background-color: #804000;
+}
+.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
+	color: #ecdbff;
+	background-color: #804000;
+}
+.navbar-default .navbar-toggle {
+	border-color: #804000;
+}
+.navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
+	background-color: #804000;
+}
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: #000000;
+}
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-form {
+	border-color: #000000;
+}
+.navbar-default .navbar-link {
+	color: #000000;
+}
+.navbar-default .navbar-link:hover {
+	color: #ecdbff;
+}
+
+@media (max-width: 767px) {
+	.navbar-default .navbar-nav .open .dropdown-menu > li > a {
+		color: #000000;
+	}
+	.navbar-default .navbar-nav .open .dropdown-menu > li > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+		color: #ecdbff;
+	}
+	.navbar-default .navbar-nav .open .dropdown-menu > .active > a, .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
+		color: #ecdbff;
+		background-color: #804000;
+	}
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
