@@ -8,13 +8,16 @@ gulp.task('build-js', function (){
 	var js_files = [
 		js_folder+'jquery.min.js',
 		js_folder+'bootstrap.min.js',
+		js_folder+'job_data.js',
+		js_folder+'resource_data.js',
+		js_folder+'upgrade_data.js',
 		js_folder+'common.js',
 		js_folder+'map_block.js',
 		js_folder+'*.js'
 	];
 	
 	gulp.src(js_files)
-	.pipe(uglify())
+	//.pipe(uglify())
 	.pipe(concat('app.js'))
 	.pipe(gulp.dest('js/'));
 });
