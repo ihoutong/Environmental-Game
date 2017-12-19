@@ -60,74 +60,66 @@
 			<table id="upgradeOption"></table>
 		</div>
 		
-	<script src="js/common.js"></script>
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.js"></script>
+	
+	<script src="./js/app.js"></script>
 	<script>
-		//return player from localStorage and store it in player variable
-		var player = returnPlayer();
-		
-		//function calls to set up the pages
-		calculateEverythingFromLastUpdate();
-		displayUpgrades();
-		displayNavBarStat();
-		saveBeforeUnload();
-		
-		
-		
-		
-		function displayUpgrades(){
-			//empty out the table with the id upgradeOption
-			$("#upgradeOption").empty();
-			//loop through all the upgrades in allUpgrades array
-			for (var i in player.allUpgrades)
-				//appends the upgrade name, description, name of the resource needed, and the cost of the upgrade to the table as a row
-				$("#upgradeOption").append("<tr><td>" + player.allUpgrades[i].name + "</td><td>" + player.allUpgrades[i].description + "</td><td>" + player.playerResource[player.allUpgrades[i].typeOfResource].name + " :</td><td> " + player.allUpgrades[i].cost + "</td><td>" + 
-									   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-									   "<button type='button' class='btn btn-default' onclick='upgradeConfirmation("+i+")'>Upgrade</button></td></tr>");
-		}
-		
-		//Takes in the index of the upgrade itself
-		//displays a confirmation asking if the player would like to upgrade or not. Clicking yes will upgrade it.
-		function upgradeConfirmation(i){
-			//display a confirmation with the upgrade name to make sure the player wants to upgrade
-			var confirmation = confirm("Are you sure you want to upgrade " + player.allUpgrades[i].name);
+		$(document).ready(function (){
+			//function calls to set up the pages
+			displayUpgrades();
 			
-			if (confirmation){
-				//checks if the player has enough of the required resource
-				if (player.playerResource[player.allUpgrades[i].typeOfResource].currentAmount >= player.allUpgrades[i].cost){
-					//grab the upgrade from the upgrade array. Used to shorten the code.
-					upgrade = player.allUpgrades[i];
-					//upgrade level. takes current level and adds the level obtained from the upgrade
-					player.playerStats[upgrade.upgradeBenefitType].level += upgrade.upgradeBenefitAmount;
-					//increase/decrease pollution and happiness (the values stored can become negative)
-					player.playerStats[0].level += upgrade.pollution;
-					player.playerStats[1].level += upgrade.happiness;
-					
-					//take the cost of the upgrade from the player resources
-					player.playerResource[upgrade.typeOfResource].currentAmount -= upgrade.cost;
-					
-					//SPECIAL CASE specific for capacity upgrades. Special because the capacity can be upgraded infinitely, with increasing costs
-					//calculates new capacity for resources after upgrading the capacity
-					if (i > 12 && i <= 20){
-						player.playerResource[upgrade.upgradeBenefitType - 6].totalCapacity = player.playerStats[upgrade.upgradeBenefitType].level * 1000;
-						upgrade.cost *= 2;
-						player.allUpgrades.splice(i+1, 0, upgrade);
-					}//special case end
-					
-					//remove the upgrade from the list
-					player.allUpgrades.splice(i,1);
-					
-					//display the list again
-					displayUpgrades();
-					displayNavBarStat();
-				}
-				//if the player does not have enough resources, display the error message
-				else
-					alert("Insufficient resources");
+			
+			function displayUpgrades(){
+				//empty out the table with the id upgradeOption
+				$("#upgradeOption").empty();
+				//loop through all the upgrades in allUpgrades array
+				for (var i in player.allUpgrades)
+					//appends the upgrade name, description, name of the resource needed, and the cost of the upgrade to the table as a row
+					$("#upgradeOption").append("<tr><td>" + player.allUpgrades[i].name + "</td><td>" + player.allUpgrades[i].description + "</td><td>" + player.playerResource[player.allUpgrades[i].typeOfResource].name + " :</td><td> " + player.allUpgrades[i].cost + "</td><td>" + 
+										   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+										   "<button type='button' class='btn btn-default' onclick='upgradeConfirmation("+i+")'>Upgrade</button></td></tr>");
 			}
-		}
-		
+			
+			//Takes in the index of the upgrade itself
+			//displays a confirmation asking if the player would like to upgrade or not. Clicking yes will upgrade it.
+			function upgradeConfirmation(i){
+				//display a confirmation with the upgrade name to make sure the player wants to upgrade
+				var confirmation = confirm("Are you sure you want to upgrade " + player.allUpgrades[i].name);
+				
+				if (confirmation){
+					//checks if the player has enough of the required resource
+					if (player.playerResource[player.allUpgrades[i].typeOfResource].currentAmount >= player.allUpgrades[i].cost){
+						//grab the upgrade from the upgrade array. Used to shorten the code.
+						upgrade = player.allUpgrades[i];
+						//upgrade level. takes current level and adds the level obtained from the upgrade
+						player.playerStats[upgrade.upgradeBenefitType].level += upgrade.upgradeBenefitAmount;
+						//increase/decrease pollution and happiness (the values stored can become negative)
+						player.playerStats[0].level += upgrade.pollution;
+						player.playerStats[1].level += upgrade.happiness;
+						
+						//take the cost of the upgrade from the player resources
+						player.playerResource[upgrade.typeOfResource].currentAmount -= upgrade.cost;
+						
+						//SPECIAL CASE specific for capacity upgrades. Special because the capacity can be upgraded infinitely, with increasing costs
+						//calculates new capacity for resources after upgrading the capacity
+						if (i > 12 && i <= 20){
+							player.playerResource[upgrade.upgradeBenefitType - 6].totalCapacity = player.playerStats[upgrade.upgradeBenefitType].level * 1000;
+							upgrade.cost *= 2;
+							player.allUpgrades.splice(i+1, 0, upgrade);
+						}//special case end
+						
+						//remove the upgrade from the list
+						player.allUpgrades.splice(i,1);
+						
+						//display the list again
+						displayUpgrades();
+						displayNavBarStat();
+					}
+					//if the player does not have enough resources, display the error message
+					else
+						alert("Insufficient resources");
+				}
+			}
+		});
 	</script>
 	</body>
 </html>

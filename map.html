@@ -111,272 +111,266 @@
 			</div>
 		</div>
 		
-	<script src="js/common.js"></script>
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.js"></script>
 	<!-- this shouild be removed, just placing it here temproarily -->
 	<script src="jobdata.js"></script>
 	<script src="class/job.js"></script>
+	
+	<script src="./js/app.js"></script>
 	<script>
-
 		//grabs canvas context in order to draw on it
 		var initialStart = $("#initialStart")[0];
 		var initialStartContext = initialStart.getContext("2d");
 		initialStartContext.strokeStyle = "black";
-		
-		//sets up the image in order to draw on the map
-		var image = [];
-		var imagesource;
-		
-		//saves the location that the user selects
-		var mapselection;
-		
-		//returns the Player object from localStorage
-		var player = returnPlayer();
-		
-		//used to save the resources located on the map location selected
-		var resourceOnSelection;
-		
-		//function calls to set up page
-		calculateEverythingFromLastUpdate();
-		displayNavBarStat();
-		drawMap();
-		saveBeforeUnload();
-		
-		//used when the page loads initially
-		//done to prevent error of players assigning a job without selecting a map location first
-		//will display the message "No jobs available at this location"
-		//also hides the Perform Job button
-		if ($("#jobToPerform").val() == null){
-			$("#jobToPerform").append("<option value='' disabled selected>No jobs available at this location </option");
-			$("#jobSubmit").hide();
-		}
-		
-		
-		/*
-			Empties out the three tags with the ids jobOptionModalLabel, workerToAllocate and amountToPerform
-			jobOptionModalLabel is a title label for the modal
-			workerToAllocate and amountToPerform contain a slider and a textfield
-			grabs the job that was selected to be performed and save it to jobSelected
-			grab the resource that was selected from the previous modal and save it to resourceIndex
-			Append the job name and the resource name to the title
-		*/
-		function displayModalDetail(){
-			$("#workerToAllocate").empty();
-			$("#amountToPerform").empty();
-			$("#jobOptionModalLabel").empty();
-			$("#timeToFinish").empty();
-			var jobSelected = $("#jobToPerform").val();
-			var resourceIndex = $("#resourceSelection").val();
-			$("#jobOptionModalLabel").append(job[jobSelected].name + " " + resourceOnSelection[resourceIndex].name);
+		$(document).ready(function (){
 			
-			//Append the slider and a textfield to display the number on the slider to div tag with id workerToAllocate
-			//The total amount of workers will be the total amount of population - the amount of workers currently performing a job
-			$("#workerToAllocate").append("Workers: <input type='range' id='workers' min="+job[jobSelected].minimumWorkersRequired+" max="+player.playerResource[0].currentAmount+
-									" onchange='insertTextFromSlider(allocatedWorker, this.value); displayTotalTimeForJob("+resourceOnSelection[resourceIndex].amount+", workers, resourceAmount)'>"+
-									"<input type='text' id='allocatedWorker' value='' readonly>");
-			//Append the slider and a textfield to display the number on the slider to div tag with id amountToPerform				
-			$("#amountToPerform").append("To Harvest: <input type='range' id='resourceAmount' min='1' max="+resourceOnSelection[resourceIndex].totalResourceCount+
-									" onchange='insertTextFromSlider(harvestAmount, this.value); displayTotalTimeForJob("+resourceOnSelection[resourceIndex].amount+", workers, resourceAmount)'>"+
-									"<input type='text' id='harvestAmount' value='' readonly>");
-			$("#timeToFinish").append("Time to complete: <input type='text' id='totalTimeForJob' value='' readonly> minutes" );
-			//Call insertTextFromSlider() in common.js that takes an id and a value for allocatedWorker and harvestAmount
-			insertTextFromSlider(allocatedWorker, $("#workers").val());
-			insertTextFromSlider(harvestAmount, $("#resourceAmount").val())
-			//Displays the amount of time (in real life) that the job requires
-			displayTotalTimeForJob(resourceOnSelection[resourceIndex].amount, workers, resourceAmount);
-		}
-		
-		//empties out the select tag with id resourceSelection, used in the first modal
-		//loop through the array resourceOnSelection and appends each resource in the map location as an option
-		function selectResource(){
-			$("#resourceSelection").empty();
-			for (var i in resourceOnSelection){
-				$("#resourceSelection").append("<option value="+i+">"+resourceOnSelection[i].name+"</option>");
-			}
-		}
-		
-		//	Displays the resources available in the area selected
-		function getResource(){
-			//empty the table tag first, removing any possible resources from previous selections
-			$("#resourceMap").empty();
-			//grab the resources from the Player object
-			resourceOnSelection = player.entireMap[mapselection.x - 1][mapselection.y - 1].resource;
-			//loops through each resource and appends the name and the amount of resources to the table
-			for (var i in resourceOnSelection){
-				$("#resourceMap").append("<tr><td>" + resourceOnSelection[i].name + ":</td><td> " + resourceOnSelection[i].totalResourceCount + "</td></tr>");
-			}
-		}
-		
-		/*
-			Empties the select tag with the id jobToPerform
-			Loop through entire job array, located in a separate file and append the name along with the index as an option to the jobToPerform select tag
-		*/
-		function displayJobs(){
-			$("#jobToPerform").empty();
-			for (var i in job){
-				$("#jobToPerform").append("<option value="+i+">"+job[i].name+"</option>");
-			}
-			$("#jobSubmit").show();
-		}
-		
-		//add a click listener to the map
-		initialStart.addEventListener ('click', function() {
-			mapselection = getMousePos();
+			//sets up the image in order to draw on the map
+			var imagesource;
 			
-			//message printed in the second canvas box.
-			//this is used primarily for testing purposes to ensure I am clicking the right box when testing and the mouse position is working properly
-			var message = 'Mouse Position: ' + mapselection.x + " , " + mapselection.y;
+			//saves the location that the user selects
+			var mapselection;
 			
-			//sets up the second canvas
-			var mousePositionContext = $("#mousePosition")[0].getContext("2d");
-			mousePositionContext.clearRect(0, 0, $("#mousePosition")[0].width, $("#mousePosition")[0].height);
-			//displays the message that was set up with the mouse positions
-			mousePositionContext.fillText(message, 15, 20);
 			
-			//if the map selected is marked as explored, then call getResource() and displayJobs()
-			if (player.entireMap[mapselection.x - 1][mapselection.y - 1].explored == true){
-				getResource();
-				displayJobs();
+			//used to save the resources located on the map location selected
+			var resourceOnSelection;
+			
+			var map = new Map();
+			map.draw();
+			
+			//used when the page loads initially
+			//done to prevent error of players assigning a job without selecting a map location first
+			//will display the message "No jobs available at this location"
+			//also hides the Perform Job button
+			if ($("#jobToPerform").val() == null){
+				$("#jobToPerform").append("<option value='' disabled selected>No jobs available at this location </option");
+				$("#jobSubmit").hide();
 			}
 			
-			//if the map is not explored, display an confirmation window to ask if the player would liek to explore
-			else{
-				var confirmation = confirm("Would you like to explore here? (Requires 5 workers)");
-				//if the user confirms then check if the amount of workers is >= 5
-				if (confirmation == true){
-					if (player.playerResource[0].currentAmount >= 5){
-					
-						//add in checker to test if adjacent locatins are explored
-						if (checkAdjacentExplored(mapselection.x - 1, mapselection.y - 1)){
-							//if the player is >= 5, then check if the location is land or sea
-							if (player.entireMap[mapselection.x - 1][mapselection.y - 1].type === 0){
-								//calls the function checkIfExploring() which checks if the area is currently being explored or not
-								checkIfExploring()
-							}
-							else{
-								//if the lcation selected is the sea, then check if the player sea exploration level is > 0
-								if (player.playerStats[4].level > 0){
-									checkIfExploring();
-								}
-								//if the player sea exploration level < 0, then display the error message
-								else
-									alert("You cannot explore on sea. Please upgrade one of the Boat");
-							}
-							//decrement player population by 5 for the job
-							player.playerResource[0].currentAmount -= 5;
-							//redisplay the navigation bar to reflect the changes in the worker
-							displayNavBarStat();
-						}
-						//display alert if adjacent area has not been explored
-						else
-							alert("You have not discovered nearby area yet");
-					}
-					//if the user does not have >= 5 workers, then display the error message
-					else 
-						alert("You do not have the required amount of workers (5)");
+			
+			/*
+				Empties out the three tags with the ids jobOptionModalLabel, workerToAllocate and amountToPerform
+				jobOptionModalLabel is a title label for the modal
+				workerToAllocate and amountToPerform contain a slider and a textfield
+				grabs the job that was selected to be performed and save it to jobSelected
+				grab the resource that was selected from the previous modal and save it to resourceIndex
+				Append the job name and the resource name to the title
+			*/
+			function displayModalDetail(){
+				$("#workerToAllocate").empty();
+				$("#amountToPerform").empty();
+				$("#jobOptionModalLabel").empty();
+				$("#timeToFinish").empty();
+				var jobSelected = $("#jobToPerform").val();
+				var resourceIndex = $("#resourceSelection").val();
+				$("#jobOptionModalLabel").append(job[jobSelected].name + " " + resourceOnSelection[resourceIndex].name);
+				
+				//Append the slider and a textfield to display the number on the slider to div tag with id workerToAllocate
+				//The total amount of workers will be the total amount of population - the amount of workers currently performing a job
+				$("#workerToAllocate").append("Workers: <input type='range' id='workers' min="+job[jobSelected].minimumWorkersRequired+" max="+player.playerResource[0].currentAmount+
+										" onchange='insertTextFromSlider(allocatedWorker, this.value); displayTotalTimeForJob("+resourceOnSelection[resourceIndex].amount+", workers, resourceAmount)'>"+
+										"<input type='text' id='allocatedWorker' value='' readonly>");
+				//Append the slider and a textfield to display the number on the slider to div tag with id amountToPerform				
+				$("#amountToPerform").append("To Harvest: <input type='range' id='resourceAmount' min='1' max="+resourceOnSelection[resourceIndex].totalResourceCount+
+										" onchange='insertTextFromSlider(harvestAmount, this.value); displayTotalTimeForJob("+resourceOnSelection[resourceIndex].amount+", workers, resourceAmount)'>"+
+										"<input type='text' id='harvestAmount' value='' readonly>");
+				$("#timeToFinish").append("Time to complete: <input type='text' id='totalTimeForJob' value='' readonly> minutes" );
+				//Call insertTextFromSlider() in common.js that takes an id and a value for allocatedWorker and harvestAmount
+				insertTextFromSlider(allocatedWorker, $("#workers").val());
+				insertTextFromSlider(harvestAmount, $("#resourceAmount").val())
+				//Displays the amount of time (in real life) that the job requires
+				displayTotalTimeForJob(resourceOnSelection[resourceIndex].amount, workers, resourceAmount);
+			}
+			
+			//empties out the select tag with id resourceSelection, used in the first modal
+			//loop through the array resourceOnSelection and appends each resource in the map location as an option
+			function selectResource(){
+				$("#resourceSelection").empty();
+				for (var i in resourceOnSelection){
+					$("#resourceSelection").append("<option value="+i+">"+resourceOnSelection[i].name+"</option>");
 				}
 			}
-		});
-	
-	//takes in the xposition and yposition of the area
-	//returns true if an adjacent area has been explored. Otherwise, returns false.
-	function checkAdjacentExplored(xpos, ypos){
-		//create the coordinates for the areas to check if they exist
-		var north = [xpos - 1, ypos];
-		var east = [xpos, ypos + 1];
-		var south = [xpos + 1, ypos];
-		var west = [xpos, ypos - 1];
-		var checkIfLocationExist = [];
-		
-		//build an array if the area exists or not
-		if (north[0] >= 0)
-			checkIfLocationExist.push(true);
-		else
-			checkIfLocationExist.push(false);
 			
-		if (east[1] <= 9)
-			checkIfLocationExist.push(true);
-		else
-			checkIfLocationExist.push(false);
+			//	Displays the resources available in the area selected
+			function getResource(){
+				//empty the table tag first, removing any possible resources from previous selections
+				$("#resourceMap").empty();
+				//grab the resources from the Player object
+				resourceOnSelection = player.entireMap[mapselection.x - 1][mapselection.y - 1].resource;
+				//loops through each resource and appends the name and the amount of resources to the table
+				for (var i in resourceOnSelection){
+					$("#resourceMap").append("<tr><td>" + resourceOnSelection[i].name + ":</td><td> " + resourceOnSelection[i].totalResourceCount + "</td></tr>");
+				}
+			}
 			
-		if (south[0] <= 9)
-			checkIfLocationExist.push(true);
-		else
-			checkIfLocationExist.push(false);
+			/*
+				Empties the select tag with the id jobToPerform
+				Loop through entire job array, located in a separate file and append the name along with the index as an option to the jobToPerform select tag
+			*/
+			function displayJobs(){
+				$("#jobToPerform").empty();
+				for (var i in job){
+					$("#jobToPerform").append("<option value="+i+">"+job[i].name+"</option>");
+				}
+				$("#jobSubmit").show();
+			}
 			
-		if (west[1] >= 0)
-			checkIfLocationExist.push(true);
-		else
-			checkIfLocationExist.push(false);
-		
-		//Return true if any of these location is explored
-		if (checkIfLocationExist[0] == true)
-			if (player.entireMap[north[0]][north[1]].explored == true)
-				return true;
-		
-		if (checkIfLocationExist[1] == true)
-			if (player.entireMap[east[0]][east[1]].explored == true)
-				return true;
+			//add a click listener to the map
+			initialStart.addEventListener ('click', function(event) {
+				mapselection = map.get_mouse_pos(event);
 				
-		if (checkIfLocationExist[2] == true)
-			if (player.entireMap[south[0]][south[1]].explored == true)
-				return true;
+				//message printed in the second canvas box.
+				//this is used primarily for testing purposes to ensure I am clicking the right box when testing and the mouse position is working properly
+				var message = 'Mouse Position: ' + mapselection.x + " , " + mapselection.y;
+				
+				//sets up the second canvas
+				var mousePositionContext = $("#mousePosition")[0].getContext("2d");
+				mousePositionContext.clearRect(0, 0, $("#mousePosition")[0].width, $("#mousePosition")[0].height);
+				//displays the message that was set up with the mouse positions
+				mousePositionContext.fillText(message, 15, 20);
+				
+				//if the map selected is marked as explored, then call getResource() and displayJobs()
+				if (player.entireMap[mapselection.x - 1][mapselection.y - 1].explored == true){
+					getResource();
+					displayJobs();
+				}
+				
+				//if the map is not explored, display an confirmation window to ask if the player would liek to explore
+				else{
+					var confirmation = confirm("Would you like to explore here? (Requires 5 workers)");
+					//if the user confirms then check if the amount of workers is >= 5
+					if (confirmation == true){
+						if (player.playerResource[0].currentAmount >= 5){
+						
+							//add in checker to test if adjacent locatins are explored
+							if (checkAdjacentExplored(mapselection.x - 1, mapselection.y - 1)){
+								//if the player is >= 5, then check if the location is land or sea
+								if (player.entireMap[mapselection.x - 1][mapselection.y - 1].type === 0){
+									//calls the function checkIfExploring() which checks if the area is currently being explored or not
+									checkIfExploring()
+								}
+								else{
+									//if the lcation selected is the sea, then check if the player sea exploration level is > 0
+									if (player.playerStats[4].level > 0){
+										checkIfExploring();
+									}
+									//if the player sea exploration level < 0, then display the error message
+									else
+										alert("You cannot explore on sea. Please upgrade one of the Boat");
+								}
+								//decrement player population by 5 for the job
+								player.playerResource[0].currentAmount -= 5;
+								//redisplay the navigation bar to reflect the changes in the worker
+								displayNavBarStat();
+							}
+							//display alert if adjacent area has not been explored
+							else
+								alert("You have not discovered nearby area yet");
+						}
+						//if the user does not have >= 5 workers, then display the error message
+						else 
+							alert("You do not have the required amount of workers (5)");
+					}
+				}
+			});
 		
-		if (checkIfLocationExist[3] == true)
-			if (player.entireMap[west[0]][west[1]].explored == true)
-				return true;
-		
-		//return false if none of the location is explored
-		return false;
-	}
-	
-	function checkIfExploring(){
-		//check if the location is already being explored
-		if (player.entireMap[mapselection.x - 1][mapselection.y - 1].isExploring == false)
-			//if it isn't, call createExploration()
-			createExploration();
-		else
-			//Otherwise, display an alert message
-			alert("This area is already being explored");
-	}
-	
-	//function to create an exploration job and pushes it to the player.jobs array
-	function createExploration(){
-		//call Job constructor
-		var newjob = new Job();
-		//call Job.Explore()
-		newjob.Explore("Exploration", 5, 900000, 5, player.entireMap[mapselection.x - 1][mapselection.y - 1], mapselection.x - 1, mapselection.y - 1);
-		//push newjob to the jobs array in player
-		player.jobs.push(newjob);
-		//sets isExploring to true so the player cannot have two exploration job at the same location
-		player.entireMap[mapselection.x - 1][mapselection.y - 1].isExploring = true;
-	}
-	
-	//function to create a harvest job and removes resource from the pool of available resources
-	function addJob(){
-		//grabs the job that was selected and saves it to jobSelected
-		var jobSelected = parseInt($("#jobToPerform").val());
-		//saves the resource selected for the job in resourceSelected
-		var resourceSelected = parseInt($("#resourceSelection").val());
-		//saves the amount of workers selected in workers
-		var workers = parseInt($("#workers").val());
-		//saves the amount of resources to harvest in harvestAmt
-		var harvestAmt = parseInt($("#harvestAmount").val());
-		//decrease the amount of workers in the entire population pool for the job
-		player.playerResource[0].currentAmount -= workers;
-		
-		//Creates an object of Job
-		var newjob = new Job();
-		//calls addJob, a function inside the Job class
-		newjob.addJob(job[jobSelected], workers, resourceOnSelection[resourceSelected], harvestAmt, mapselection.x - 1, mapselection.y - 1, resourceSelected);
-		//adds the newjob to the jobs array in the Player object
-		player.jobs.push(newjob);
-		
-		//decrement the resource itself. Otherwise, the player can harvest over the total amount of resources
-		player.entireMap[mapselection.x - 1][mapselection.y - 1].resource[resourceSelected].totalResourceCount -= harvestAmt;
-	}
-	
+			//takes in the xposition and yposition of the area
+			//returns true if an adjacent area has been explored. Otherwise, returns false.
+			function checkAdjacentExplored(xpos, ypos){
+				//create the coordinates for the areas to check if they exist
+				var north = [xpos - 1, ypos];
+				var east = [xpos, ypos + 1];
+				var south = [xpos + 1, ypos];
+				var west = [xpos, ypos - 1];
+				var checkIfLocationExist = [];
+				
+				//build an array if the area exists or not
+				if (north[0] >= 0)
+					checkIfLocationExist.push(true);
+				else
+					checkIfLocationExist.push(false);
+					
+				if (east[1] <= 9)
+					checkIfLocationExist.push(true);
+				else
+					checkIfLocationExist.push(false);
+					
+				if (south[0] <= 9)
+					checkIfLocationExist.push(true);
+				else
+					checkIfLocationExist.push(false);
+					
+				if (west[1] >= 0)
+					checkIfLocationExist.push(true);
+				else
+					checkIfLocationExist.push(false);
+				
+				//Return true if any of these location is explored
+				if (checkIfLocationExist[0] == true)
+					if (player.entireMap[north[0]][north[1]].explored == true)
+						return true;
+				
+				if (checkIfLocationExist[1] == true)
+					if (player.entireMap[east[0]][east[1]].explored == true)
+						return true;
+						
+				if (checkIfLocationExist[2] == true)
+					if (player.entireMap[south[0]][south[1]].explored == true)
+						return true;
+				
+				if (checkIfLocationExist[3] == true)
+					if (player.entireMap[west[0]][west[1]].explored == true)
+						return true;
+				
+				//return false if none of the location is explored
+				return false;
+			}
+			
+			function checkIfExploring(){
+				//check if the location is already being explored
+				if (player.entireMap[mapselection.x - 1][mapselection.y - 1].isExploring == false)
+					//if it isn't, call createExploration()
+					createExploration();
+				else
+					//Otherwise, display an alert message
+					alert("This area is already being explored");
+			}
+			
+			//function to create an exploration job and pushes it to the player.jobs array
+			function createExploration(){
+				//call Job constructor
+				var newjob = new Job();
+				//call Job.Explore()
+				newjob.Explore("Exploration", 5, 900000, 5, player.entireMap[mapselection.x - 1][mapselection.y - 1], mapselection.x - 1, mapselection.y - 1);
+				//push newjob to the jobs array in player
+				player.jobs.push(newjob);
+				//sets isExploring to true so the player cannot have two exploration job at the same location
+				player.entireMap[mapselection.x - 1][mapselection.y - 1].isExploring = true;
+			}
+			
+			//function to create a harvest job and removes resource from the pool of available resources
+			function addJob(){
+				//grabs the job that was selected and saves it to jobSelected
+				var jobSelected = parseInt($("#jobToPerform").val());
+				//saves the resource selected for the job in resourceSelected
+				var resourceSelected = parseInt($("#resourceSelection").val());
+				//saves the amount of workers selected in workers
+				var workers = parseInt($("#workers").val());
+				//saves the amount of resources to harvest in harvestAmt
+				var harvestAmt = parseInt($("#harvestAmount").val());
+				//decrease the amount of workers in the entire population pool for the job
+				player.playerResource[0].currentAmount -= workers;
+				
+				//Creates an object of Job
+				var newjob = new Job();
+				//calls addJob, a function inside the Job class
+				newjob.addJob(job[jobSelected], workers, resourceOnSelection[resourceSelected], harvestAmt, mapselection.x - 1, mapselection.y - 1, resourceSelected);
+				//adds the newjob to the jobs array in the Player object
+				player.jobs.push(newjob);
+				
+				//decrement the resource itself. Otherwise, the player can harvest over the total amount of resources
+				player.entireMap[mapselection.x - 1][mapselection.y - 1].resource[resourceSelected].totalResourceCount -= harvestAmt;
+			}
+
+		});
 	</script>
 	</body>
 </html>

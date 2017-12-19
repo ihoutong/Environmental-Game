@@ -56,26 +56,25 @@
 		<script src="js/jquery.min.js"></script>
 		<script src="js/bootstrap.js"></script>
 		<script>
-			//functions calls to set up page
-			var player = returnPlayer();
-			displayNavBarStat();
-			saveBeforeUnload();
-			
-			//loop through the player stats to display them in a table
-			for (var i in player.playerStats){
-				$("#playerStats").append("<tr id="+i+"><td>"+player.playerStats[i].name+"</td><td>Level: "+player.playerStats[i].level+"</td><td>");
-				//calculate the total amount after factoring in level
-				//if statements to display the total amount. Not every player stat (Harvest, Hunt, Sea/Land Exploration) has a total amount so the if statements are needed
-				if (i == 0 || i == 1)
-					$("#"+i).append(player.playerStats[i].level + "</td></tr>");
-				else if (i == 6)
-					$("#"+i).append(player.playerStats[i].level * player.playerResource[1].amountPerLevel + "</td></tr>");
-				else if (i > 6)
-					$("#"+i).append(player.playerResource[i-6].totalCapacity );
-				else
-					$("#"+i).append("N/A</td></tr>");
-			}
-			
+			$(document).ready(function (){
+				
+				saveBeforeUnload();
+				
+				//loop through the player stats to display them in a table
+				for (var i in player.playerStats){
+					$("#playerStats").append("<tr id="+i+"><td>"+player.playerStats[i].name+"</td><td>Level: "+player.playerStats[i].level+"</td><td>");
+					//calculate the total amount after factoring in level
+					//if statements to display the total amount. Not every player stat (Harvest, Hunt, Sea/Land Exploration) has a total amount so the if statements are needed
+					if (i == 0 || i == 1)
+						$("#"+i).append(player.playerStats[i].level + "</td></tr>");
+					else if (i == 6)
+						$("#"+i).append(player.playerStats[i].level * player.playerResource[1].amountPerLevel + "</td></tr>");
+					else if (i > 6)
+						$("#"+i).append(player.playerResource[i-6].totalCapacity );
+					else
+						$("#"+i).append("N/A</td></tr>");
+				}
+			});
 		</script>
 	</body>
 </html>

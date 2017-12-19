@@ -1,3 +1,38 @@
+var player = '';
+var image = [];
+
+$(document).ready(function (){
+	confirm_restart_game();
+	player = new Player();
+	var is_player_loaded = player.load_player();
+	
+	if (is_player_loaded){
+		calculateEverythingFromLastUpdate();
+		displayNavBarStat();
+		
+		if ($("#resource").length){
+			displayResources();
+		}
+	
+	}
+});
+
+function confirm_restart_game(){
+	var page = document.location.href.split('/').pop();
+	
+	if (page == 'start.html' && localStorage.player){
+		//if the player does have an existing file, asks the player if they would like to start over
+		var confirmation = confirm("Player already exists, do you want to start over? (If not, you will be moved to home)");
+		//clears localStorage if they want to restart
+		if (confirmation)
+			localStorage.clear();
+		//otherwise, it moves them to the homepage
+		else
+			document.location.href="home.html";
+		
+	}
+}
+
 //Called when the player presses "Restart" on navigation menu
 //Will clear the localStorage so the player can start over
 function restartGame(){
@@ -15,119 +50,6 @@ function gameOver(){
 		document.location.href = "gameover.html";
 }
 
-//event listener for when the user leaves the page
-//This way, all the changes will only need to be saved one time, rather than saving it multiple times within one page
-function saveBeforeUnload(){
-	window.addEventListener("beforeunload", function(){
-		//if player = 0, then that means restartGame() has been called and the player wants to restart the game
-		if (player != 0)
-			localStorage.player = JSON.stringify(player);
-	});
-}
-
-//Creates the horizontal and vertical black lines shown on the map. Makes it easier to separate sections of the map for the user
-function createGrid(){
-	// create vertical lines
-	for (var x = 80; x < initialStart.width; x += 80){
-		//console.log(x);
-		initialStartContext.moveTo(x, 0);
-		initialStartContext.lineTo(x, 400);
-		initialStartContext.stroke();
-	}
-	//create horizontal lines
-	for (var y = 40; y < initialStart.height; y+= 40){
-		initialStartContext.moveTo(0, y);
-		initialStartContext.lineTo(800, y);
-		initialStartContext.stroke();
-	}
-}
-
-//returns the position of the mouse and divides the x by 80 and y by 40
-//Used to detect specific click events
-function getMousePos(){
-	var rect = $("#initialStart")[0].getBoundingClientRect();
-	var currentx = Math.floor((event.clientX - rect.left) / (rect.right - rect.left)*$("#initialStart")[0].width);
-	var currenty = Math.floor((event.clientY - rect.top) / (rect.bottom - rect.top)*$("#initialStart")[0].height);
-	//The +1 is unnecessary but is included since some previous code accounted for the +1.
-	return {
-		x: (Math.floor(currentx/80) + 1 ),
-		y: (Math.floor(currenty/40) + 1)
-	};
-}
-
-//create an array of images and instantiate them with a specific image
-function createMapImage(){
-	imagesource = {
-		0: "images/RPG Tileset/FILES/PNG/land.png",
-		1: "images/RPG Tileset/FILES/PNG/water.png",
-		2: "images/house/house rip.png",
-		//this image is no longer used, it was a temporary place holder
-		//2: "images/RPG Tileset/FILES/PNG/well.png",
-		3: "images/pastel_resources/desert.png"
-	};
-	for (var i in imagesource){
-		image[i] = new Image();
-		image[i].src = imagesource[i];
-	}
-}
-
-//Draws the map for the game
-//If player data exists, then the map data will be pulled and drawn
-//Otherwise, a new map will be generated
-function drawMap(){
-	createMapImage();
-	//using image[0] to call the onload function, the one used doesnt matter the important part is to ensure the code gets run after one of the image variable is instantiated
-	image[0].onload = function (){
-		//check if player exists
-		if (localStorage.player){
-			//grab the entire map data from localStorage
-			entireMap = (JSON.parse(localStorage.player)).entireMap;
-			//Loop through the entire two dimensional array
-			for (var x = 0; x < 10; x ++){
-				for (var y = 0; y < 10; y++){
-					//draws the image (water/land) onto the map
-					initialStartContext.drawImage(image[entireMap[x][y].type], x * 80, y * 40);
-					//If the place isn't explored, it becomes grayed out
-					if (entireMap[x][y].explored == false){
-						initialStartContext.fillStyle = "rgba(0,0,0,.5)";
-						initialStartContext.fillRect(x * 80, y * 40, 80, 40)
-					}
-				}
-			}
-			//Draws player starting location.
-			//type is not set to 2 (which is a different image in the image array) because the image is transparent, allowing for an overlay
-			initialStartContext.drawImage(image[2], player.baseXPos * 80, player.baseYPos * 40);
-		}
-		//if player does not exist, then a map will need to be generated
-		else {
-			player.entireMap = [];
-			for (var x = 0; x < 10; x ++){
-				//create two dimensional array
-				player.entireMap[x] = [];
-				for (var y = 0; y < 10; y++){
-					//randomize for land/water that will be used
-					var random = Math.floor(Math.random() * 2);
-					//draw the land/water
-					initialStartContext.drawImage(image[random], x * 80, y * 40);
-					//if the image drawn is water, then grey out the image
-					if (random == 1){
-						initialStartContext.fillStyle = "rgba(0,0,0,.5)";
-						initialStartContext.fillRect(x * 80, y * 40, 80, 40)
-					}
-					//create an empty array for the npcMessages. Necessary, due to localStorage
-					player.npcMessages = [];
-					//Save all the upgrades to the player Object itself. This is so the upgrades can be removed as the player obtains them
-					player.allUpgrades = upgrade;
-					
-					//call the Map constructor to create a Map object
-					player.entireMap[x][y] = new Map(random, x, y);
-					
-				}
-			}
-		}
-		createGrid();
-	}
-}
 
 //Empties and appends everything in the navigation bar
 function displayNavBarStat(){
@@ -151,41 +73,6 @@ function displayResources(){
 		$("#resource").append("<tr><td>" + player.playerResource[i].name + ":</td><td>&nbsp;" + player.playerResource[i].currentAmount + " / " + player.playerResource[i].totalCapacity + "</td></tr>");
 	}
 }
-
-//returns the player object from the localStorage
-function returnPlayer(){
-	return JSON.parse(localStorage.player);
-}
-
-/* functions are no longer needed. Researched JSON a bit more and found out that JSON can store numbers, not only string
-//Converts the resource at the index from string to integer
-function convertPlayerResourceToInt(index){
-	player.playerResource[index].currentAmount = parseInt(player.playerResource[index].currentAmount);
-	player.playerResource[index].totalCapacity = parseInt(player.playerResource[index].totalCapacity);
-	player.playerResource[index].amountPerLevel = parseInt(player.playerResource[index].amountPerLevel);
-}
-
-//converts all player resource from string to integer
-function convertAllPlayerResourceToInt(){
-	for (var index in player.playerResource){
-		player.playerResource[index].currentAmount = parseInt(player.playerResource[index].currentAmount);
-		player.playerResource[index].totalCapacity = parseInt(player.playerResource[index].totalCapacity);
-		player.playerResource[index].amountPerLevel = parseInt(player.playerResource[index].amountPerLevel);
-	}
-}
-
-//converts all player jobs from string to integer
-function convertAllPlayerJobsToInt(){
-	for (var i in player.jobs){
-	//will be used to assign more workers
-		player.jobs[i].minimumWorkersRequired = parseInt(player.jobs[i].minimumWorkersRequired);
-		player.jobs[i].totalWorkers = parseInt(player.jobs[i].totalWorkers);
-		player.jobs[i].totalTimeRequired = parseInt(player.jobs[i].totalTimeRequired);
-		player.jobs[i].completion = parseInt(player.jobs[i].completion);
-	}
-	
-}*/
-
 //calculates everything that needs progression based on time from the last time an update was performed
 function calculateEverythingFromLastUpdate(){
 	//save the date of last update, current date and the difference in milliseconds between the two.

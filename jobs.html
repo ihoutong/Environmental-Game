@@ -86,131 +86,124 @@
 			<table id="jobs"></table>
 		</div>
 		
-	<script src="js/common.js"></script>
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.js"></script>
+	
+	<script src="./js/app.js"></script>
 	<script>
-		
-		//return player from localStorage
-		var player = returnPlayer();
-		
-		//function calls to set up the page
-		calculateEverythingFromLastUpdate();
-		displayEverything();
-		saveBeforeUnload();
-		incrementProgress();
-		
-		//displays all the jobs that are currently being worked on
-		//Note - this is different from displayJobs() from map.html which displays the job that you are allowed to perform on the area
-		function displayJobs(){
-			//empties the jobs table first
-			$("#jobs").empty();
-			//check the array size of the jobs array
-			if (player.jobs.length != 0){
-				//if jobs array is != 0, then loop through the entire array
-				for (var i in player.jobs){
-					//calculate the progress of the job so far rounded down and save it to the variable progressSoFar. The calculation needs to be done since the completion rate is saved in milliseconds.
-					var progressSoFar = Math.floor((player.jobs[i].completion/player.jobs[i].totalTimeRequired) * 100);
-					//Append the job name, progress bar with the progress, total amount of workers, and an Assign and End button
-					//When Assign is clicked, it'll bring up a modal where the player can change the total amount of workers assigned to the job
-					//Calling End will call the function End(), ending the job prematurely. Ending the job prematurely will give the % of the resource
-					$("#jobs").append("<tr><td>"+player.jobs[i].name+"</td><td class='container col-md-4'><div class='progress'>"+
-								"<div id="+i+" class='progress-bar' role='progressbar' aria-valuenow="+progressSoFar+" aria-valuemin='0' aria-valuemax='100' style='width:"+progressSoFar+"%;'>"+progressSoFar+
-								"</div></div></td><td>Workers Assigned: "+ player.jobs[i].totalWorkers+"</td><td>" +
-								"<button type='button' class='btn btn-default' onclick='displayModalDetail("+i+")' data-toggle='modal' data-target='#assignMoreWorker'>Assign</button> <br />" +
-								"<button type='button' class='btn btn-default' onclick='End("+i+", false)'>End</button><br />");
-							//	"<button type='button' class='btn btn-default' onclick='incrementProgressManual()'>testing progress bar</button></td></tr>");
-					}
-			}
-			//if the jobs array is == 0, then display this message
-			else {
-				$("#jobs").append("<tr><td>There are no jobs currently being worked on </td></tr>");
-			}
-		}
-		
-		//Called after the player hits submit in the modal for assigning new workers
-		//saves the new amount of workers to totalWorkers variable
-		function assign(){
-			//grabs the value of the amount of workers selected and the index of the job
-			//currently a string so it needs to be parsed into an integer first
-			var newWorker = parseInt($("#workers").val());
-			var index = $("#jobIndex").val();
-			//checks if the player is removing workers from the job
-			if (player.jobs[index].totalWorkers > newWorker){
-				//minus player.jobs[index].totalWorkers by newWorker in order to get the amount of workers to return to the pool
-				player.playerResource[0].currentAmount += player.jobs[index].totalWorkers - newWorker;
-				//save the new amount of workers
-				player.jobs[index].totalWorkers = newWorker;
-			}
-			//if the player adds more workers
-			else{
-				//minus newWorker by player.jobs[index].totalWorkers to know how many workers to remove from the players population
-				player.playerResource[0].currentAmount -= newWorker - player.jobs[index].totalWorkers;
-				//save the new amount of workers
-				player.jobs[index].totalWorkers = newWorker;
-			}
-			//call displayJobs() and displayNavBarStat() to display changes
-			displayJobs();
-			displayNavBarStat();
-		}
-		
-		//displays the information inside the modal when the player presses Assign
-		function displayModalDetail(index){
-			//Remove everything in div tag with id workerToAllocate and timeToFinish
-			$("#workerToAllocate").empty();
-			$("#timeToFinish").empty();
-			//retrive the job from the jobs array, not necessary but makes the code look much nicer
-			var job = player.jobs[index];
-			//create a slider where the value is the current amount of workers, minimum is the minimum amount of workers required
-			//and the maximum is the amount of workers that are not performing the job + the amount of workers currently in that job
-			//Also create a text field so the player will know the amount of workers 
-			//create a hidden textfield in order to use the jobIndex for the assign() function
-			$("#workerToAllocate").append("Workers: <input type='range' value="+job.totalWorkers+" id='workers' min="+job.minimumWorkersRequired+
-									" max="+(player.playerResource[0].currentAmount + job.totalWorkers)+" onchange='insertTextFromSlider(workerAmount, this.value); displayTotalTimeForJob("+job.totalTimeRequired+", workers, "+job.resourceHarvesting+")'>"+
-									" <input type='text' id='workerAmount' value=''>"+
-									" <input type='text' id='jobIndex' value="+index+" hidden>");
-			$("#timeToFinish").append("Time to complete: <input type='text' id='totalTimeForJob' value='' readonly> minutes" );
-			//needed so the number from the slider and the current total time required is displayed when the modal appears
-			//without it, the user would have to move the slider first
-			insertTextFromSlider(workerAmount, job.totalWorkers);
-			displayTotalTimeForJob(job.totalTimeRequired, workers, job.resourceHarvesting);
-		}
-		
-		//function to increment the progress using a timer
-		function incrementProgress(){
-			//set the function to run every x milliseconds
+		$(document).ready(function (){
+			console.log('dasdsad');
+			//function calls to set up the page
+			displayEverything();
+			
+			//Interval to increment progress bar
 			setInterval(function(){
 				//Called every five minutes if the player stays on the page
 				calculateEverythingFromLastUpdate();
 				displayEverything();
 			}, 300000);
-		}
-		
-		//calls displayJobs() and displayResources()
-		function displayEverything(){
-			displayJobs();
-			displayResources();
-			displayNavBarStat();
-		}
-		
-		//Manual incrementing of job progress, done for testing purposes
-		/*
-		function incrementProgressManual(){
-			var indexesToRemove = [];
-			for (var i in player.jobs){
-				playerJobProgress(i, 1, indexesToRemove);
-				displayJobs();
+			
+			//displays all the jobs that are currently being worked on
+			//Note - this is different from displayJobs() from map.html which displays the job that you are allowed to perform on the area
+			function displayJobs(){
+				//empties the jobs table first
+				$("#jobs").empty();
+				//check the array size of the jobs array
+				if (player.jobs.length != 0){
+					//if jobs array is != 0, then loop through the entire array
+					for (var i in player.jobs){
+						//calculate the progress of the job so far rounded down and save it to the variable progressSoFar. The calculation needs to be done since the completion rate is saved in milliseconds.
+						var progressSoFar = Math.floor((player.jobs[i].completion/player.jobs[i].totalTimeRequired) * 100);
+						console.log(progressSoFar);
+						console.log(player.jobs[i].completion);
+						//Append the job name, progress bar with the progress, total amount of workers, and an Assign and End button
+						//When Assign is clicked, it'll bring up a modal where the player can change the total amount of workers assigned to the job
+						//Calling End will call the function End(), ending the job prematurely. Ending the job prematurely will give the % of the resource
+						$("#jobs").append("<tr><td>"+player.jobs[i].name+"</td><td class='container col-md-4'><div class='progress'>"+
+									"<div id="+i+" class='progress-bar' role='progressbar' aria-valuenow="+progressSoFar+" aria-valuemin='0' aria-valuemax='100' style='width:"+progressSoFar+"%;'>"+progressSoFar+
+									"</div></div></td><td>Workers Assigned: "+ player.jobs[i].totalWorkers+"</td><td>" +
+									"<button type='button' class='btn btn-default' onclick='displayModalDetail("+i+")' data-toggle='modal' data-target='#assignMoreWorker'>Assign</button> <br />" +
+									"<button type='button' class='btn btn-default' onclick='End("+i+", false)'>End</button><br />");
+						}
+				}
+				//if the jobs array is == 0, then display this message
+				else {
+					$("#jobs").append("<tr><td>There are no jobs currently being worked on </td></tr>");
+				}
 			}
-			if (indexesToRemove.length > 1)
-				displayAlert(1, indexesToRemove.length);
-			else if (indexesToRemove.length == 1)
-				displayAlert(2, player.jobs[indexesToRemove].name);
-				
-			while (indexesToRemove.length != 0)
-				End(indexesToRemove.pop(), true);
-			displayEverything();
-			//localStorage.player = JSON.stringify(player);
-		}*/
+			
+			//Called after the player hits submit in the modal for assigning new workers
+			//saves the new amount of workers to totalWorkers variable
+			function assign(){
+				//grabs the value of the amount of workers selected and the index of the job
+				//currently a string so it needs to be parsed into an integer first
+				var newWorker = parseInt($("#workers").val());
+				var index = $("#jobIndex").val();
+				//checks if the player is removing workers from the job
+				if (player.jobs[index].totalWorkers > newWorker){
+					//minus player.jobs[index].totalWorkers by newWorker in order to get the amount of workers to return to the pool
+					player.playerResource[0].currentAmount += player.jobs[index].totalWorkers - newWorker;
+					//save the new amount of workers
+					player.jobs[index].totalWorkers = newWorker;
+				}
+				//if the player adds more workers
+				else{
+					//minus newWorker by player.jobs[index].totalWorkers to know how many workers to remove from the players population
+					player.playerResource[0].currentAmount -= newWorker - player.jobs[index].totalWorkers;
+					//save the new amount of workers
+					player.jobs[index].totalWorkers = newWorker;
+				}
+				//call displayJobs() and displayNavBarStat() to display changes
+				displayJobs();
+				displayNavBarStat();
+			}
+			
+			//displays the information inside the modal when the player presses Assign
+			function displayModalDetail(index){
+				//Remove everything in div tag with id workerToAllocate and timeToFinish
+				$("#workerToAllocate").empty();
+				$("#timeToFinish").empty();
+				//retrive the job from the jobs array, not necessary but makes the code look much nicer
+				var job = player.jobs[index];
+				//create a slider where the value is the current amount of workers, minimum is the minimum amount of workers required
+				//and the maximum is the amount of workers that are not performing the job + the amount of workers currently in that job
+				//Also create a text field so the player will know the amount of workers 
+				//create a hidden textfield in order to use the jobIndex for the assign() function
+				$("#workerToAllocate").append("Workers: <input type='range' value="+job.totalWorkers+" id='workers' min="+job.minimumWorkersRequired+
+										" max="+(player.playerResource[0].currentAmount + job.totalWorkers)+" onchange='insertTextFromSlider(workerAmount, this.value); displayTotalTimeForJob("+job.totalTimeRequired+", workers, "+job.resourceHarvesting+")'>"+
+										" <input type='text' id='workerAmount' value=''>"+
+										" <input type='text' id='jobIndex' value="+index+" hidden>");
+				$("#timeToFinish").append("Time to complete: <input type='text' id='totalTimeForJob' value='' readonly> minutes" );
+				//needed so the number from the slider and the current total time required is displayed when the modal appears
+				//without it, the user would have to move the slider first
+				insertTextFromSlider(workerAmount, job.totalWorkers);
+				displayTotalTimeForJob(job.totalTimeRequired, workers, job.resourceHarvesting);
+			}
+			
+			//calls displayJobs() and displayResources()
+			function displayEverything(){
+				displayJobs();
+				displayResources();
+				displayNavBarStat();
+			}
+			
+			//Manual incrementing of job progress, done for testing purposes
+			/*
+			function incrementProgressManual(){
+				var indexesToRemove = [];
+				for (var i in player.jobs){
+					playerJobProgress(i, 1, indexesToRemove);
+					displayJobs();
+				}
+				if (indexesToRemove.length > 1)
+					displayAlert(1, indexesToRemove.length);
+				else if (indexesToRemove.length == 1)
+					displayAlert(2, player.jobs[indexesToRemove].name);
+					
+				while (indexesToRemove.length != 0)
+					End(indexesToRemove.pop(), true);
+				displayEverything();
+				//localStorage.player = JSON.stringify(player);
+			}*/
+		})
 	</script>
 	</body>
 </html>

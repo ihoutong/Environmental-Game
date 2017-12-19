@@ -46,28 +46,28 @@
 			<table id="playerStats"></table>
 		</div>
 		
-		<script src="js/common.js"></script>
 		<script src="js/jquery.min.js"></script>
 		<script src="js/bootstrap.js"></script>
+		<script src="js/common.js"></script>
 		<script>
-			//grabs the player from localStorage
-			var player = returnPlayer();
-			//checks how the player lost, from reaching the time limit or having the population decreasing to 0
-			//Displays the appropriate alert
-			if ((player.timeElapsed / 12) >= player.timeLimit && player.timeLimit != 0)
-				displayAlert(5, " Your time have run out!");
-			else if (player.playerResource[0].totalCapacity <= 0)
-				displayAlert(5, " Your population has been decreased to 0");
-			//returns the player to home page if they reach this place by accident and they have not met the conditions for losing
-			else
-				document.location.href = "home.html";
-			//Displays the player name
-			$("#playerStats").append("<tr colspan='2'><td><strong>"+player.name+"</strong> stats at game over</td></tr>");
-			//display the amount of time they survived for.
-			$("#playerStats").append("<tr><td>Total Time Survived </td><td>" + Math.floor(player.timeElapsed / 12) + " Years " + player.timeElapsed % 12 + " Months</td></tr> ");
-			//display the player stats when they lost
-			for (var i in player.playerStats)
-				$("#playerStats").append("<tr><td>"+player.playerStats[i].name+"</td><td>Level: "+player.playerStats[i].level+"</td></tr>");
+			$(document).ready(function (){
+				//checks how the player lost, from reaching the time limit or having the population decreasing to 0
+				//Displays the appropriate alert
+				if ((player.timeElapsed / 12) >= player.timeLimit && player.timeLimit != 0)
+					displayAlert(5, " Your time have run out!");
+				else if (player.playerResource[0].totalCapacity <= 0)
+					displayAlert(5, " Your population has been decreased to 0");
+				//returns the player to home page if they reach this place by accident and they have not met the conditions for losing
+				else
+					document.location.href = "home.html";
+				//Displays the player name
+				$("#playerStats").append("<tr colspan='2'><td><strong>"+player.name+"</strong> stats at game over</td></tr>");
+				//display the amount of time they survived for.
+				$("#playerStats").append("<tr><td>Total Time Survived </td><td>" + Math.floor(player.timeElapsed / 12) + " Years " + player.timeElapsed % 12 + " Months</td></tr> ");
+				//display the player stats when they lost
+				for (var i in player.playerStats)
+					$("#playerStats").append("<tr><td>"+player.playerStats[i].name+"</td><td>Level: "+player.playerStats[i].level+"</td></tr>");
+			});
 		</script>
 	</body>
 </html>

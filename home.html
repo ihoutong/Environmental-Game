@@ -66,74 +66,30 @@
 			<table id="resource"></table>
 		</div>
 	
-	<script src="js/common.js"></script>
-	<script src="js/jquery.min.js"></script>
-	<script src="js/bootstrap.js"></script>
 	<script src="message.js"></script>
+	<script src="./js/app.js"></script>
 	<script>
-		
-		//calls returnPlayer which returns the player objects
-		var player = returnPlayer();
-		//convertAllPlayerResourceToInt();
-		//function calls to set up the page
-		calculateEverythingFromLastUpdate();
-		displayResources();
-		displayNPCChatter();
-		displayNavBarStat();
-		saveBeforeUnload();
-		
-		//sets a timer to call addtoNPCChatter every minute.
-		setInterval(function(){
-			addToNPCChatter();
-		}, 60000);
-		
-		
-		/* No longer used. Was originally used to increment resources. This is now down in calculateEverythingFromLastUpdate()
-		function increaseResourceAuto(){
-			for (var i in player.playerResource){
-				if (player.playerResource[i].currentAmount < player.playerResource[i].totalCapacity){
-					player.playerResource[i].currentAmount += player.playerResource[i].amountPerMonth;
+		$(document).ready(function (){
+
+			//convertAllPlayerResourceToInt();
+			//function calls to set up the page
+			displayNPCChatter();
+			
+			//sets a timer to call addtoNPCChatter every minute.
+			setInterval(function(){
+				player.generate_chatter();
+				displayNPCChatter();
+			}, 60000);
+			
+			//empties everything in the textarea tag with the id npcChatter
+			//then it loops through player.npcMessages and appends each message to the textarea
+			function displayNPCChatter(){
+				$("#npcChatter").empty();
+				for (var i in player.npcMessages){
+					$("#npcChatter").append(player.npcMessages[i] + "\n");
 				}
 			}
-		}*/
-		
-		//empties everything in the textarea tag with the id npcChatter
-		//then it loops through player.npcMessages and appends each message to the textarea
-		function displayNPCChatter(){
-			$("#npcChatter").empty();
-			for (var i in player.npcMessages){
-				$("#npcChatter").append(player.npcMessages[i] + "\n");
-			}
-		}
-		
-		//checks if the size of npcMessages array is greater than 15
-		//if it is then it deletes the last one (at index 14)
-		//then it adds a new message to the front of the array
-		//calls displayNPCChatter() to display the new message
-		function addToNPCChatter(){
-			if (player.npcMessages.length > 15){
-				player.npcMessages.splice(14, 1);
-			}
-			player.npcMessages.unshift(messages[Math.floor(Math.random() * 13)]);
-			displayNPCChatter();
-		}
-		
-		//functions I used to test the timer previously.
-		//This was for something that was originally part of the home page design
-		//I had decided it wasn't necessary and so the code is no longer needed.
-		/*
-		setInterval(function(){
-			$("#job1").empty();
-			job1completion++;
-			$("#job1").append("Job 1 completion rate: "+job1completion);
-		}, 1000);
-		
-		setInterval(function(){
-			$("#job2").empty();
-			job2completion++;
-			$("#job2").append("Job 2 completion rate: "+job2completion);
-		}, 1000);
-		*/
+		});
 	</script>
 	</body>
 </html>

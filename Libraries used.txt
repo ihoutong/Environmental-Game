@@ -1,2 +1,0 @@
-Jquery csv
-http://code.google.com/p/jquery-csv/
