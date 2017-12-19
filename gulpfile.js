@@ -17,7 +17,7 @@ gulp.task('build-js', function (){
 	];
 	
 	gulp.src(js_files)
-	//.pipe(uglify())
+	.pipe(uglify())
 	.pipe(concat('app.js'))
 	.pipe(gulp.dest('js/'));
 });
